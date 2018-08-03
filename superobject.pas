@@ -5982,26 +5982,40 @@ function TSuperRttiContext.FromJson(TypeInfo: PTypeInfo; const obj: ISuperObject
     i: Integer;
     o: ISuperObject;
   begin
-    case ObjectGetType(obj) of
-    stInt, stBoolean:
-      begin
-        i := obj.AsInteger;
-        TypeData := GetTypeData(TypeInfo);
-        if TypeData.MaxValue > TypeData.MinValue then
-          Result := (i >= TypeData.MinValue) and (i <= TypeData.MaxValue) else
-          Result := (i >= TypeData.MinValue) and (i <= Int64(PCardinal(@TypeData.MaxValue)^));
-        if Result then
-          TValue.Make(@i, TypeInfo, Value);
+    if obj <> nil then 
+    begin
+      case ObjectGetType(obj) of
+      stInt, stBoolean:
+        begin
+          i := obj.AsInteger;
+          TypeData := GetTypeData(TypeInfo);
+          if TypeData.MaxValue > TypeData.MinValue then
+            Result := (i >= TypeData.MinValue) and (i <= TypeData.MaxValue) else
+            Result := (i >= TypeData.MinValue) and (i <= Int64(PCardinal(@TypeData.MaxValue)^));
+          if Result then
+            TValue.Make(@i, TypeInfo, Value);
+        end;
+      stString:
+        begin
+          o := SO(obj.AsString);
+          if not ObjectIsType(o, stString) then
+            FromInt(o) else
+            Result := False;
+        end;
+      else
+        Result := False;
       end;
-    stString:
-      begin
-        o := SO(obj.AsString);
-        if not ObjectIsType(o, stString) then
-          FromInt(o) else
-          Result := False;
-      end;
+    end
     else
-      Result := False;
+    begin
+      try
+        o := TSuperObject.Create(stNull);
+        TValue.Make(@o, TypeInfo, Value);
+      except 
+        i := 0;
+        TValue.Make(@i, TypeInfo, Value); 
+      end;
+      Result := True;      
     end;
   end;
 
