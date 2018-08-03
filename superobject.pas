@@ -6009,11 +6009,11 @@ function TSuperRttiContext.FromJson(TypeInfo: PTypeInfo; const obj: ISuperObject
     else
     begin
       try
-        o := TSuperObject.Create(stNull);
-        TValue.Make(@o, TypeInfo, Value);
-      except 
         i := 0;
         TValue.Make(@i, TypeInfo, Value); 
+      except 
+        o := TSuperObject.Create(stNull);
+        TValue.Make(@o, TypeInfo, Value);
       end;
       Result := True;      
     end;
